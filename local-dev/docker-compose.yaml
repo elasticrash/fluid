@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Postgres.Dockerfile
+    restart: always
+    environment:
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scheduler
+    ports:
+      - "5432:5432"
+    container_name: scheduler
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

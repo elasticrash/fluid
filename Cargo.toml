@@ -1,0 +1,2 @@
+[workspace]
+members = ["fluid", "generator", "processor", "distributor", "db", "common"]

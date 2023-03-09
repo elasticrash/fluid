@@ -29,7 +29,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Schedule::Expression).string().not_null())
                     .col(ColumnDef::new(Schedule::Plan).integer().not_null())
                     .col(ColumnDef::new(Schedule::Start).timestamp().not_null())
-                    .col(ColumnDef::new(Schedule::End).timestamp().null())
+                    .col(ColumnDef::new(Schedule::Finish).timestamp().null())
+                    .col(ColumnDef::new(Schedule::Process).timestamp().null())
                     .to_owned(),
             )
             .await
@@ -51,5 +52,6 @@ pub enum Schedule {
     Expression,
     Plan,
     Start,
-    End,
+    Finish,
+    Process,
 }

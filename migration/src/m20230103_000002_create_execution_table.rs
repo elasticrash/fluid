@@ -28,7 +28,7 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Execution::Name).string().not_null())
-                    .col(ColumnDef::new(Execution::When).json())
+                    .col(ColumnDef::new(Execution::When).timestamp().not_null())
                     .col(ColumnDef::new(Execution::Pending).integer().not_null())
                     .col(ColumnDef::new(Execution::ScheduleId).integer().not_null())
                     .foreign_key(

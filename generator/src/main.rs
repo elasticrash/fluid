@@ -1,10 +1,13 @@
 use anyhow::Result;
+use chrono::{Duration, NaiveDateTime, Utc};
 use crossbeam_channel::{bounded, select, tick, Receiver};
 use std::env;
-use std::time::Duration;
 
 use fluid_common::config::read;
-use fluid_db::{configuration::Configuration, set_up_db};
+use fluid_db::configuration::Configuration;
+use fluid_db::entities::{prelude::*, *};
+use fluid_db::set_up_db;
+use sea_orm::*;
 
 fn ctrl_channel() -> Result<Receiver<()>, ctrlc::Error> {
     let (sender, receiver) = bounded(100);
@@ -31,12 +34,54 @@ async fn main() -> Result<()> {
     };
 
     let ctrl_c_events = ctrl_channel()?;
-    let ticks = tick(Duration::from_secs(1));
+    let ticks = tick(std::time::Duration::from_secs(1));
 
     loop {
         select! {
             recv(ticks) -> _ => {
-                println!("working!");
+
+                let events: Vec<schedule::Model> = Schedule::find().filter(
+                    Condition::any()
+                        .add(schedule::Column::Process.is_null())
+                        .add(schedule::Column::Process.lte(Utc::now()))
+                ).all(&db).await?;
+
+                println!("found {:?} records", events.len());
+
+                for e in events {
+                    let expression: Vec<&str> = e.expression.split(':').collect();
+                    let time_value = expression[0].parse::<i64>().unwrap();
+
+                    let mut last_insert: Option<NaiveDateTime>  = None;
+                    let start = if e.process.is_some() { e.process.unwrap() } else {e.start};
+
+                    for i in 1..11 {
+                        let execution = execution::ActiveModel {
+                            schedule_id: ActiveValue::Set(e.id),
+                            name: ActiveValue::Set(e.clone().name),
+                            pending: ActiveValue::Set(1),
+                            when: match expression[1] {
+                                "Y" => ActiveValue::Set(start + Duration::days(time_value * 365 * i)),
+                                "M" => ActiveValue::Set(start + Duration::days(time_value * 30 * i)),
+                                "D" => ActiveValue::Set(start + Duration::days(time_value * i)),
+                                "h" => ActiveValue::Set(start + Duration::hours(time_value * i)),
+                                "m" => ActiveValue::Set(start + Duration::minutes(time_value * i)),
+                                "s" => ActiveValue::Set(start + Duration::seconds(time_value * i)),
+                                _ => panic!(),
+                            },
+                            ..Default::default()
+                        };
+
+                        last_insert = Some(execution.clone().when.unwrap());
+
+                        Execution::insert(execution).exec(&db).await?;
+                    }
+                    if last_insert.is_some() {
+                        let mut ev: schedule::ActiveModel = e.clone().into();
+                        ev.process = Set(last_insert.to_owned());
+                        ev.update(&db).await?;
+                    }
+                }
             }
             recv(ctrl_c_events) -> _ => {
                 println!();

@@ -8,7 +8,7 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub name: String,
-    pub when: Option<Json>,
+    pub when: DateTime,
     pub pending: i32,
     pub schedule_id: i32,
 }

@@ -54,5 +54,5 @@ pub enum CallBack {
     Table,
     Id,
     ScheduleId,
-    Endpoint
+    Endpoint,
 }

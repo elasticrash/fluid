@@ -11,7 +11,8 @@ pub struct Model {
     pub expression: String,
     pub plan: i32,
     pub start: DateTime,
-    pub end: Option<DateTime>,
+    pub finish: Option<DateTime>,
+    pub process: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -31,6 +31,11 @@ async fn schedule_event(db: &State<DatabaseConnection>, task: Task) -> status::A
     status::Accepted(Some("Task Accepted".to_string()))
 }
 
+#[get("/loop")]
+async fn verify_callback() -> status::Accepted<String> {
+    status::Accepted(Some("Event Received".to_string()))
+}
+
 #[launch]
 async fn rocket() -> _ {
     let args: Vec<String> = env::args().collect();
@@ -48,5 +53,5 @@ async fn rocket() -> _ {
 
     rocket::build()
         .manage(db)
-        .mount("/", routes![schedule_event])
+        .mount("/", routes![schedule_event, verify_callback])
 }

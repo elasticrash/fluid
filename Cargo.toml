@@ -1,2 +1,2 @@
 [workspace]
-members = ["fluid", "generator", "processor", "distributor", "db", "common"]
+members = ["fluid", "generator", "processor", "distributor", "db", "common", "migration"]

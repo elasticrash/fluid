@@ -1,5 +1,5 @@
-pub mod entities;
 pub mod configuration;
+pub mod entities;
 use configuration::Configuration;
 use sea_orm::*;
 

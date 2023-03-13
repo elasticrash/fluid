@@ -22,11 +22,19 @@ async fn schedule_event(db: &State<DatabaseConnection>, task: Task) -> status::A
     let schedule = schedule::ActiveModel {
         name: ActiveValue::Set(task.name.unwrap()),
         expression: ActiveValue::Set(task.expression),
-        plan: ActiveValue::Set(task.plan),
         start: ActiveValue::Set(Utc::now().naive_utc()),
+        finish: ActiveValue::Set(task.finish),
         ..Default::default()
     };
-    let _ = Schedule::insert(schedule).exec(db).await;
+    let scheduled_process = Schedule::insert(schedule.clone()).exec(db).await;
+
+    let call_back = call_back::ActiveModel {
+        endpoint: ActiveValue::Set(task.endpoint),
+        schedule_id: ActiveValue::Set(scheduled_process.unwrap().last_insert_id),
+        ..Default::default()
+    };
+
+    let _call_back_process = CallBack::insert(call_back).exec(db).await;
 
     status::Accepted(Some("Task Accepted".to_string()))
 }

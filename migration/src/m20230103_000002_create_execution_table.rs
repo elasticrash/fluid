@@ -31,6 +31,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Execution::When).timestamp().not_null())
                     .col(ColumnDef::new(Execution::Pending).integer().not_null())
                     .col(ColumnDef::new(Execution::ScheduleId).integer().not_null())
+                    .col(ColumnDef::new(Execution::ClaimedBy).string().null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk-execution-schedule_id")
@@ -58,5 +59,6 @@ pub enum Execution {
     Name,
     When,
     Pending,
+    ClaimedBy,
     ScheduleId,
 }

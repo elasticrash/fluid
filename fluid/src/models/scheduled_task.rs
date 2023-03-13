@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 use rocket::data::ToByteUnit;
 use rocket::data::{Data, FromData, Outcome};
 use rocket::http::Status;
@@ -9,9 +9,8 @@ use serde::Deserialize;
 pub struct Task {
     pub name: Option<String>,
     pub expression: String,
-    pub plan: i32,
-    pub start: NaiveDateTime,
-    pub end: Option<NaiveDateTime>,
+    pub start: Option<NaiveDateTime>,
+    pub finish: Option<NaiveDateTime>,
     pub endpoint: String,
 }
 
@@ -45,10 +44,11 @@ impl<'r> FromData<'r> for Task {
         match task {
             Ok(mut tsk) => {
                 if tsk.name.is_none() {
-                    tsk.name = Some(format!(
-                        "default-{}",
-                        chrono::offset::Utc::now().to_string()
-                    ));
+                    tsk.name = Some(format!("default-{}", chrono::offset::Utc::now()));
+                }
+
+                if tsk.start.is_none() {
+                    tsk.start = Some(Utc::now().naive_utc());
                 }
                 let expression: Vec<&str> = tsk.expression.split(':').collect();
                 if expression.len() == 2 && expression[0].parse::<i32>().is_ok() {

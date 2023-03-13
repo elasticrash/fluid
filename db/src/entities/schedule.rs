@@ -9,7 +9,6 @@ pub struct Model {
     pub id: i32,
     pub name: String,
     pub expression: String,
-    pub plan: i32,
     pub start: DateTime,
     pub finish: Option<DateTime>,
     pub process: Option<DateTime>,

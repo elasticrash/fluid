@@ -11,6 +11,7 @@ pub struct Model {
     pub when: DateTime,
     pub pending: i32,
     pub schedule_id: i32,
+    pub claimed_by: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

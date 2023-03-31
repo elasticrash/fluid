@@ -5,12 +5,21 @@ use rocket::http::Status;
 use rocket::request::{self, Request};
 use serde::Deserialize;
 
+/// Represents a scheduled task.
+///
+/// A task is defined by a schedule expression that determines how often the task is executed,
+/// and an endpoint that is called upon execution.
 #[derive(Debug, Deserialize)]
 pub struct Task {
+    /// The name of the task, if not defined it gets generated automatically.
     pub name: Option<String>,
+    /// The schedule expression that determines how often the task is executed.
     pub expression: String,
+    /// The date and time the task's cycle will start. If not set, it is automatically set to now.
     pub start: Option<NaiveDateTime>,
+    /// The date and time the task's cycle will end. If not set, it is assumed to be infinite.
     pub finish: Option<NaiveDateTime>,
+    /// The webhook endpoint to be called upon execution.
     pub endpoint: String,
 }
 

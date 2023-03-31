@@ -103,14 +103,14 @@ async fn create_tasks(db: &DatabaseConnection) {
                 break;
             }
             if let Err(err) = Execution::insert(execution).exec(db).await {
-                println!("failed to write record : {}", err)
+                eprintln!("failed to write record : {}", err)
             };
         }
         if last_insert.is_some() {
             let mut ev: schedule::ActiveModel = e.clone().into();
             ev.process = Set(last_insert.to_owned());
             if let Err(err) = ev.update(db).await {
-                println!("failed to update record : {}", err)
+                eprintln!("failed to update record : {}", err)
             };
         }
     }

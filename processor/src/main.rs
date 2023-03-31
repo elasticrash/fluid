@@ -66,8 +66,8 @@ async fn process_tasks(db: &DatabaseConnection) {
     {
         Ok(records) => records,
         Err(err) => {
-            println!("Unable to perform a query at this point, due: {}", err);
-            vec![]
+            eprintln!("Unable to perform a query at this point, due: {}", err);
+            return;
         }
     };
 
@@ -90,16 +90,19 @@ async fn process_tasks(db: &DatabaseConnection) {
             .await
         {
             Ok(data) => data.rows_affected,
-            Err(err) => panic!("{}", err),
+            Err(err) => {
+                eprintln!("Failed to claim task {}: {}", task.id, err);
+                continue;
+            }
         };
 
         if affected_rows == 0 {
-            println!(
+            eprintln!(
                 "record with id {}, was claimed by another instance",
                 try_to_claim_task.clone().id.unwrap()
             );
 
-            return;
+            continue;
         }
 
         let call_back: Vec<call_back::Model> = match CallBack::find()
@@ -111,7 +114,7 @@ async fn process_tasks(db: &DatabaseConnection) {
         {
             Ok(records) => records,
             Err(err) => {
-                println!("Unable to perform a query at this point, due: {}", err);
+                eprintln!("Unable to perform a query at this point, due: {}", err);
                 vec![]
             }
         };
@@ -136,12 +139,12 @@ async fn process_tasks(db: &DatabaseConnection) {
                 try_to_claim_task.clone().id.unwrap(),
                 call_back[0].clone().endpoint,
             ),
-            Err(err) => println!("Error communicating with webhook URL : {}", err),
+            Err(err) => eprintln!("Error communicating with webhook URL : {}", err),
         };
         try_to_claim_task.pending = ActiveValue::Set(0);
 
         if let Err(err) = try_to_claim_task.update(db).await {
-            println!("failed to update record : {}", err)
+            eprintln!("failed to update record : {}", err)
         };
     }
 }

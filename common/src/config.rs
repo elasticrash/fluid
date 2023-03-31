@@ -11,6 +11,6 @@ pub fn read(filename: &str) -> Configuration {
             let config: Configuration = serde_json::from_str(&buffer).unwrap();
             config
         }
-        _ => Configuration::default(),
+        Err(_) => Configuration::default(),
     }
 }
